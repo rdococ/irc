@@ -119,10 +119,48 @@ minetest.chatcommands["msg"].func = function(name, param, ...)
 		param:find("^([^%s@]+)@([^%s@]+) (.*)$")
 	
 	if foundat then
+		if not irc.connected then
+			return false, "Not connected to IRC. Use /irc_connect to connect."
+		end
+		
 		if servername == "IRC" then
-			minetest.chatcommands["irc_msg"].func(name, username .. " " .. message)
+			local validNick = false
+			for nick in pairs(irc.conn.channels[irc.config.channel].users) do
+				if nick:lower() == username then
+					validNick = true
+					break
+				end
+			end
+			
+			if username:find("serv$") or username:find("bot$") then
+				return false, "You can not message that user. (it looks like a bot or service)"
+			end
+			
+			if not validNick then
+				return false, "You can not message that user."
+			end
+			
+			irc.say(servername, ("<%s> %s"):format(name, message))
+			return true
 		else
-			minetest.chatcommands["irc_msg"].func(name, servername .. " @" .. username .. " " .. message)
+			local validNick = false
+			for nick in pairs(irc.conn.channels[irc.config.channel].users) do
+				if nick:lower() == servername then
+					validNick = true
+					break
+				end
+			end
+			
+			if servername:find("serv$") or servername:find("bot$") then
+				return false, "That is not a valid server. (it looks like a bot or service)"
+			end
+			
+			if not validNick then
+				return false, "That is not a valid server."
+			end
+			
+			irc.say(servername, ("@%s %s"):format(username, message))
+			return true
 		end
 		return
 	end
