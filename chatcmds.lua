@@ -112,6 +112,25 @@ minetest.register_chatcommand("irc_quote", {
 })
 
 
+local oldmsg = minetest.chatcommands["msg"].func
+-- luacheck: ignore
+minetest.chatcommands["msg"].func = function(name, param, ...)
+	local foundat, _, username, servername, message =
+		param:find("^([^%s@]+)@([^%s@]+) (.*)$")
+	
+	if foundat then
+		if servername == "IRC" then
+			minetest.chatcommands["irc_msg"].func(name, username .. " " .. message)
+		else
+			minetest.chatcommands["irc_msg"].func(name, servername .. " @" .. username .. " " .. message)
+		end
+		return
+	end
+	
+	return oldmsg(name, param, ...)
+end
+
+
 local oldme = minetest.chatcommands["me"].func
 -- luacheck: ignore
 minetest.chatcommands["me"].func = function(name, param, ...)
