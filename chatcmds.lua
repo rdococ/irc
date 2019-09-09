@@ -126,7 +126,7 @@ minetest.chatcommands["msg"].func = function(name, param, ...)
 		if servername == "IRC" then
 			local validNick = false
 			for nick in pairs(irc.conn.channels[irc.config.channel].users) do
-				if nick:lower() == username then
+				if nick:lower() == username:lower() then
 					validNick = true
 					break
 				end
@@ -145,7 +145,7 @@ minetest.chatcommands["msg"].func = function(name, param, ...)
 		else
 			local validNick = false
 			for nick in pairs(irc.conn.channels[irc.config.channel].users) do
-				if nick:lower() == servername then
+				if nick:lower() == servername:lower() then
 					validNick = true
 					break
 				end
